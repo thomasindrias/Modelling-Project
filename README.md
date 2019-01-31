@@ -1,6 +1,6 @@
 # Modelling-Project
 
-##Collision based physics simulated through Three.js
+## Collision based physics simulated through Three.js
 
 
 **MATLAB**
