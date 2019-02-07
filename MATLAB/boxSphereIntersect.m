@@ -22,8 +22,8 @@ x = max(boxMinX, min(spherePos.x, boxMaxX));
 y = max(boxMinY, min(spherePos.y, boxMaxY));
 
 
-distance = sqrt((x - spherePos.x) * (x - spherePos.x) + (y - spherePos.y) * (y - spherePos.y));
+distance = (x - spherePos.x)^2 + (y - spherePos.y)^2;
 
-collision = distance < sphereRadius;
+collision = distance < sphereRadius^2;
 
 end
