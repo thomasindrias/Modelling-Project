@@ -8,16 +8,16 @@ darkGrey = [0.1,0.1,0.1];
 brickRed = [0.6,0.25,0.2];
 
 % Ball properties
-Ball.pos.x = -2; % Inital position 
+Ball.pos.x = 40; % Inital position 
 Ball.pos.y = 0; % Inital position 
-Ball.vel.x = 1; % Inital position 
+Ball.vel.x = -4; % Inital position 
 Ball.vel.y = 0; % Inital position 
-Ball.mass = 1; % Weight in kilograms
-Ball.radius = 0.5; % ball radius
+Ball.mass = 2; % Weight in kilograms
+Ball.radius = 4; % ball radius
 
 % Floor properties
-Floor.size.x = 20;
-Floor.size.y = 20;
+Floor.size.x = 2000;
+Floor.size.y = 2000;
 Floor.pos.x = 0;
 Floor.pos.y = 0;
 Floor.XMin = Floor.pos.x - (Floor.size.x/2);
@@ -27,13 +27,32 @@ Floor.YMax = Floor.pos.y + (Floor.size.y/2);
 
 
 % Box1 (Brick) properties
-Box1.size.x = 2; % Initial position
-Box1.size.y = 2; % Initial position
-Box1.pos.x = 2; % Initial position
+Box1.size.x = 10; % Initial position
+Box1.size.y = 10; % Initial position
+Box1.pos.x = 5000; % Initial position
 Box1.pos.y = 0; % Initial position
 Box1.vel.x = 0; % Initial speed
 Box1.vel.y = 0; % Initial speed
-Box1.mass = 0.5; % Weight in Kilograms
+Box1.mass = 2; % Weight in Kilograms
+Box1.moi = 0; % Moment of inertia
+Box1.xMin = Box1.pos.x - (Box1.size.x/2);
+Box1.xMax = Box1.pos.x + (Box1.size.x/2);
+Box1.yMin = Box1.pos.y - (Box1.size.y/2);
+Box1.yMax = Box1.pos.y + (Box1.size.y/2);
+
+% Box2 (Brick) properties
+Box2.size.x = 10; % Initial position
+Box2.size.y = 10; % Initial position
+Box2.pos.x = -60; % Initial position
+Box2.pos.y = 0; % Initial position
+Box2.vel.x = 4; % Initial speed
+Box2.vel.y = 0; % Initial speed
+Box2.mass = 1; % Weight in Kilograms
+Box2.moi = 0; % Moment of inertia
+Box2.xMin = Box2.pos.x - (Box2.size.x/2);
+Box2.xMax = Box2.pos.x + (Box2.size.x/2);
+Box2.yMin = Box2.pos.y - (Box2.size.y/2);
+Box2.yMax = Box2.pos.y + (Box2.size.y/2);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % We want to loop constant updates, we need functions to call
@@ -63,7 +82,10 @@ ballBody = patch(Ball.pos.x + (Ball.radius*Xcircle), Ball.pos.y + (Ball.radius*Y
 
 % This creates our body patch ("Creates a rigid body")
 FloorBody = createBoxPatch(Floor.pos, Floor.size, lightGrey, 0.5);
+
+% CREATE FUNCTION TO DYNAMICALLY CREATE BODIES
 box1Body = createBoxPatch(Box1.pos, Box1.size, brickRed, 1);
+box2Body = createBoxPatch(Box2.pos, Box2.size, brickRed, 1);
 
 
 % Init draw space 
@@ -72,58 +94,72 @@ axis([Floor.XMin-1,Floor.XMax+1, Floor.YMin-1, Floor.YMax+1]);
 hold on;
 
 % Update loop
-for i = 1:600
-
-  % We check if the ball is hitting the border wall.
-  if (Ball.pos.x < Floor.XMin+Ball.radius)
-    Ball.vel.x = -Ball.vel.x;
-    Ball.vel.y = -Ball.vel.y;
-  end
-
-  if (Ball.pos.x > Floor.XMax-Ball.radius)
-    Ball.vel.x = -Ball.vel.x;
-    Ball.vel.y = -Ball.vel.y;
-  end
-  
-  if (Ball.pos.y < Floor.YMin+Ball.radius) 
-    Ball.vel.x = -Ball.vel.x;
-    Ball.vel.y = -Ball.vel.y;
-  end
-
-  if (Ball.pos.y > Floor.YMax-Ball.radius) 
-    Ball.vel.x = -Ball.vel.x;
-    Ball.vel.y = -Ball.vel.y;
-  end
-
+for i = 1:300
   % Check if our Ball is colliding with Box1
+  % CREATE FUNCTION TO DYNAMICALLY CHECK INTERSECTIONS
   if boxSphereIntersect(Ball.pos, Ball.radius, Box1.pos, Box1.size)
-    disp('Ball has collided with the sphere. DO SHIT')
-    Ball.vel.x = -Ball.vel.x;
-    Ball.vel.y = -Ball.vel.y;
+    disp('Ball has collided with the box. DO SHIT')
+    vBall = ((Ball.mass - Box1.mass)/(Ball.mass + Box1.mass))*Ball.vel.x + ((2*Box1.mass)/(Ball.mass + Box1.mass))*Box1.vel.x;
+    %Ball.vel.y = -Ball.vel.y;
+
+    Box1.vel.x = ((2*Ball.mass)/(Ball.mass + Box1.mass))*Ball.vel.x + ((Box1.mass - Ball.mass)/(Ball.mass + Box1.mass))*Box1.vel.x;
+    %Box1.vel.y =
+
+    Ball.vel.x = vBall;
+  end
+  % CREATE FUNCTION TO DYNAMICALLY CHECK INTERSECTIONS
+  if boxSphereIntersect(Ball.pos, Ball.radius, Box2.pos, Box2.size)
+    disp('Ball has collided with the box. DO SHIT')
+    vBall = ((Ball.mass - Box2.mass)/(Ball.mass + Box2.mass))*Ball.vel.x + ((2*Box2.mass)/(Ball.mass + Box1.mass))*Box2.vel.x;
+    %Ball.vel.y = -Ball.vel.y;
+
+    Box2.vel.x = ((2*Ball.mass)/(Ball.mass + Box2.mass))*Ball.vel.x + ((Box2.mass - Ball.mass)/(Ball.mass + Box2.mass))*Box2.vel.x;
+    %Box1.vel.y =
+
+    Ball.vel.x = vBall;
   end
 
+  % IMPLEMENT HANDLING OF COLLISIONS AT AN ANGLE
+  % IMPLEMENT HANDLING OF COLLISIONS AT AN ANGLE
+  % IMPLEMENT HANDLING OF COLLISIONS AT AN ANGLE
+  % IMPLEMENT HANDLING OF COLLISIONS AT AN ANGLE
 
   % Update our objects and make them ready for drawnow.
+  % CREATE FUNCTION TO DYNAMICALLY UPDATE GRAPHICS
   set(ballBody,'XData',Ball.pos.x + (Ball.radius*Xcircle), 'YData', Ball.pos.y + (Ball.radius*Ycircle));
+  set(box1Body,'XData',[Box1.xMin, Box1.xMax, Box1.xMax, Box1.xMin], 'YData',[Box1.yMin, Box1.yMin, Box1.yMax, Box1.yMax]);
+  set(box2Body,'XData',[Box2.xMin, Box2.xMax, Box2.xMax, Box2.xMin], 'YData',[Box2.yMin, Box2.yMin, Box2.yMax, Box2.yMax]);
   drawnow;
 
-  % Handle Friction
-  % F = m*a = m*derivate(Velocity) -> We have velocity, we have mass.
-  Ball.vel.x
-  if (abs(Ball.vel.x) > 0.01 && Ball.vel.x > 0)
-    disp('Vel greater then 0')
-    Ball.vel.x = Ball.vel.x - 0.03*i*0.01;
-  end
+  % Handle linear Friction for Ball
+  [Ball.vel.x, Ball.vel.y] = handleBallFriction(Ball.vel, Ball.mass);
 
-  if (abs(Ball.vel.x) > 0.01 && Ball.vel.x < 0)
-    disp('Vel less then 0')
-    Ball.vel.x = Ball.vel.x + 0.03*i*0.01;
-  end
+  % Handle linear friction for Boxes
+  % CREATE FUNCTION TO DYNAMICALLY HANDLE FRICTION
+  Box1.vel.x = handleBoxFriction(Box1.vel, Box1.mass);
+  Box2.vel.x = handleBallFriction(Box2.vel, Box2.mass);
 
   % Update Vectors for next iteration  using euler for differential eqs.
+  % CREATE FUNCTION TO DYNAMICALLY UPDATE POSITION
   Ball.pos.x = Ball.pos.x + Ball.vel.x;
   Ball.pos.y = Ball.pos.y + Ball.vel.y;
   
+  Box1.pos.x = Box1.pos.x + Box1.vel.x;
+  Box1.pos.y = Box1.pos.y + Box1.vel.y;
+
+  Box2.pos.x = Box2.pos.x + Box2.vel.x;
+  Box2.pos.y = Box2.pos.y + Box2.vel.y;
+
+  % CREATE FUNCTION TO DYNAMICALLY UPDATE BOUNDRIES
+  Box1.xMin = Box1.pos.x - (Box1.size.x/2);
+  Box1.xMax = Box1.pos.x + (Box1.size.x/2);
+  Box1.yMin = Box1.pos.y - (Box1.size.y/2);
+  Box1.yMax = Box1.pos.y + (Box1.size.y/2);
+
+  Box2.xMin = Box2.pos.x - (Box2.size.x/2);
+  Box2.xMax = Box2.pos.x + (Box2.size.x/2);
+  Box2.yMin = Box2.pos.y - (Box2.size.y/2);
+  Box2.yMax = Box2.pos.y + (Box2.size.y/2);
 
   F(i) = getframe(gcf);
 end
@@ -137,4 +173,5 @@ for i=1:length(F)
   frame = F(i);    
   writeVideo(writerObj, frame);
 end
+
 close(writerObj);
