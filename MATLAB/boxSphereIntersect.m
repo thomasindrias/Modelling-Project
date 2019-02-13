@@ -1,4 +1,4 @@
-function collision = boxSphereIntersect(spherePos, sphereRadius, boxPos, boxSize) % Example: (ball1.pos, ball1.radius, box1.pos, box1.size)
+function [collision, x, y] = boxSphereIntersect(spherePos, sphereRadius, boxPos, boxSize) % Example: (ball1.pos, ball1.radius, box1.pos, box1.size)
 %%%%%%%%%%%%%%%%%%%%
 % Collision intersection between box
 % INPUT:
