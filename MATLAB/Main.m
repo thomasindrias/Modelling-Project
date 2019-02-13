@@ -97,8 +97,8 @@ hold on;
 for i = 1:300
   % Check if our Ball is colliding with Box1
   % CREATE FUNCTION TO DYNAMICALLY CHECK INTERSECTIONS
-  [box1CollisionBool, box1CollisionPosX, box1CollisionPosY] = boxSphereIntersect(Ball.pos, Ball.radius, Box1.pos, Box1.size);
-  if box1CollisionBool
+  [box1Collision, box1CollisionPosX, box1CollisionPosY] = boxSphereIntersect(Ball.pos, Ball.radius, Box1.pos, Box1.size);
+  if box1Collision
     disp('Ball has collided with the box. DO SHIT')
     vBallX = ((Ball.mass - Box1.mass)/(Ball.mass + Box1.mass))*Ball.vel.x + ((2*Box1.mass)/(Ball.mass + Box1.mass))*Box1.vel.x;
     vBallY = ((Ball.mass - Box1.mass)/(Ball.mass + Box1.mass))*Ball.vel.y + ((2*Box1.mass)/(Ball.mass + Box1.mass))*Box1.vel.y;
@@ -111,8 +111,8 @@ for i = 1:300
   end
 
   % CREATE FUNCTION TO DYNAMICALLY CHECK INTERSECTIONS
-  [box2CollisionBool, box2CollisionPosX, box2CollisionPosY] = boxSphereIntersect(Ball.pos, Ball.radius, Box2.pos, Box2.size);
-  if box2CollisionBool
+  [box2Collision, box2CollisionPosX, box2CollisionPosY] = boxSphereIntersect(Ball.pos, Ball.radius, Box2.pos, Box2.size);
+  if box2Collision
     disp('Ball has collided with the box. DO SHIT')
     vBallX = ((Ball.mass - Box2.mass)/(Ball.mass + Box2.mass))*Ball.vel.x + ((2*Box2.mass)/(Ball.mass + Box2.mass))*Box2.vel.x;
     vBallY = ((Ball.mass - Box2.mass)/(Ball.mass + Box2.mass))*Ball.vel.y + ((2*Box2.mass)/(Ball.mass + Box2.mass))*Box2.vel.y;
