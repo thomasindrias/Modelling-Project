@@ -11,7 +11,7 @@ brickRed = [0.6,0.25,0.2];
 Ball.pos.x = 100; % Inital position 
 Ball.pos.y = 60; % Inital position 
 Ball.vel.x = -4; % Inital position 
-Ball.vel.y = -3; % Inital position 
+Ball.vel.y = -4; % Inital position 
 Ball.mass = 1; % Weight in kilograms
 Ball.radius = 8; % ball radius
 
