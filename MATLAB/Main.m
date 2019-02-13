@@ -8,12 +8,12 @@ darkGrey = [0.1,0.1,0.1];
 brickRed = [0.6,0.25,0.2];
 
 % Ball properties
-Ball.pos.x = 50; % Inital position 
-Ball.pos.y = 100; % Inital position 
-Ball.vel.x = -2; % Inital position 
-Ball.vel.y = -2; % Inital position 
+Ball.pos.x = 100; % Inital position 
+Ball.pos.y = 60; % Inital position 
+Ball.vel.x = -4; % Inital position 
+Ball.vel.y = -3; % Inital position 
 Ball.mass = 1; % Weight in kilograms
-Ball.radius = 4; % ball radius
+Ball.radius = 8; % ball radius
 
 % Floor properties
 Floor.size.x = 400;
@@ -27,14 +27,18 @@ Floor.YMax = Floor.pos.y + (Floor.size.y/2);
 
 
 % Box1 (Brick) properties
-Box1.size.x = 10; % Initial position
-Box1.size.y = 10; % Initial position
-Box1.pos.x = -60; % Initial position
+Box1.size.x = 30; % Initial position
+Box1.size.y = 30; % Initial position
+Box1.pos.x = 0; % Initial position
 Box1.pos.y = 0; % Initial position
 Box1.vel.x = 0; % Initial speed
 Box1.vel.y = 0; % Initial speed
 Box1.mass = 2; % Weight in Kilograms
 Box1.moi = 0; % Moment of inertia
+Box1.normal.right = [1,0]; 
+Box1.normal.up = [0,1];
+Box1.normal.left = [-1,0];
+Box1.normal.down = [0,-1];
 Box1.xMin = Box1.pos.x - (Box1.size.x/2);
 Box1.xMax = Box1.pos.x + (Box1.size.x/2);
 Box1.yMin = Box1.pos.y - (Box1.size.y/2);
@@ -99,16 +103,29 @@ for i = 1:300
   % CREATE FUNCTION TO DYNAMICALLY CHECK INTERSECTIONS
   [box1Collision, box1CollisionPosX, box1CollisionPosY] = boxSphereIntersect(Ball.pos, Ball.radius, Box1.pos, Box1.size);
   if box1Collision
-    disp('Ball has collided with the box. DO SHIT')
+    disp('Ball has collided with the Box1. DO SHIT')
     % New implementation for ball
-    n_x = (Box1.pos.x - box1CollisionPosX)/(Box1.size.x); % This wont work completely. The equations is for sphere -> sphere
-    n_y = (Box1.pos.y - box1CollisionPosY)/(Box1.size.y); % This wont work completely. The equations is for sphere -> sphere
+    %n_x = (Box1.pos.x - box1CollisionPosX)/(Box1.size.x); % This wont work completely. The equations is for sphere -> sphere
+    %n_y = (Box1.pos.y - box1CollisionPosY)/(Box1.size.y); % This wont work completely. The equations is for sphere -> sphere
+    %p = (2*(Ball.vel.x*n_x + Ball.vel.y*n_y))/(Ball.mass + Box1.mass);
+    %vBallX = Ball.vel.x - (p * Ball.mass * n_x) - (p * Box1.mass * n_x);
+    %vBallY = Box1.vel.y - (p * Ball.mass * n_y) - (p * Box1.mass * n_y);
 
-    p = (2*(Ball.vel.x*n_x + Ball.vel.y*n_y))/(Ball.mass + Box1.mass);
+    % We have the ball position
+    % We have velocity vectors for x and y
+    % We can now create the velocity vector between ball center and velocityPoint
+    %atan2d(Box1.normal.right(2) - Ball.vel.y, Box1.normal.right(1) - Ball.vel.x) % I THINK IT WORK
 
-    % vBallX = Ball.vel.x - (p * Ball.mass * n_x) - (p * Box1.mass * n_x);
-    % vBallY = Box1.vel.y - (p * Ball.mass * n_y) - (p * Box1.mass * n_y);
-
+    theta = 180-rad2deg(acos(dot([Ball.vel.x, Ball.vel.y], [Box1.normal.right(1), Box1.normal.right(2)])/(norm([Ball.vel.x, Ball.vel.y])*norm([Box1.normal.right(1), Box1.normal.right(2)]))))
+    
+    % dot([Ball.pos.x - box1CollisionPosX, Ball.pos.y - box1CollisionPosY, 0].*[Box1.normal.right(1), Box1.normal.right(2), 0])/(norm([Ball.pos.x - box1CollisionPosX, Ball.pos.y - box1CollisionPosY, 0])*norm([Box1.normal.right(1), Box1.normal.right(2), 0]))
+    
+    % This will return the angle between a chosen normal and the velocity vector.
+    % This kinda does not work. Vi behöver generera normalen utifrån nuvarande pos på boxen.
+    % Vi behöver generera normalen rakt  ut från collisionen 
+    % Exempel: CollisonX + 1 för att "dra" en normal från kollision i x-led
+    % Vi behöver berätta för matlab var normalen börjar. Alltså boxWallX + 1 till exempel så vi får rätt vinkel med atan2d
+    % Speciellt om det ska funka med roterande objekt
     vBallX = ((Ball.mass - Box1.mass)/(Ball.mass + Box1.mass))*Ball.vel.x + ((2*Box1.mass)/(Ball.mass + Box1.mass))*Box1.vel.x;
     vBallY = ((Ball.mass - Box1.mass)/(Ball.mass + Box1.mass))*Ball.vel.y + ((2*Box1.mass)/(Ball.mass + Box1.mass))*Box1.vel.y;
 
@@ -119,19 +136,20 @@ for i = 1:300
     Ball.vel.y = vBallY;
   end
 
+  
   % CREATE FUNCTION TO DYNAMICALLY CHECK INTERSECTIONS
-  [box2Collision, box2CollisionPosX, box2CollisionPosY] = boxSphereIntersect(Ball.pos, Ball.radius, Box2.pos, Box2.size);
-  if box2Collision
-    disp('Ball has collided with the box. DO SHIT')
-    vBallX = ((Ball.mass - Box2.mass)/(Ball.mass + Box2.mass))*Ball.vel.x + ((2*Box2.mass)/(Ball.mass + Box2.mass))*Box2.vel.x;
-    vBallY = ((Ball.mass - Box2.mass)/(Ball.mass + Box2.mass))*Ball.vel.y + ((2*Box2.mass)/(Ball.mass + Box2.mass))*Box2.vel.y;
+  %[box2Collision, box2CollisionPosX, box2CollisionPosY] = boxSphereIntersect(Ball.pos, Ball.radius, Box2.pos, Box2.size);
+  %if box2Collision
+  %  disp('Ball has collided with the box. DO SHIT')
+  %  vBallX = ((Ball.mass - Box2.mass)/(Ball.mass + Box2.mass))*Ball.vel.x + ((2*Box2.mass)/(Ball.mass + Box2.mass))*Box2.vel.x;
+  %  vBallY = ((Ball.mass - Box2.mass)/(Ball.mass + Box2.mass))*Ball.vel.y + ((2*Box2.mass)/(Ball.mass + Box2.mass))*Box2.vel.y;
 
-    Box2.vel.x = ((2*Ball.mass)/(Ball.mass + Box2.mass))*Ball.vel.x + ((Box2.mass - Ball.mass)/(Ball.mass + Box2.mass))*Box2.vel.x;
-    Box2.vel.y = ((2*Ball.mass)/(Ball.mass + Box2.mass))*Ball.vel.y + ((Box2.mass - Ball.mass)/(Ball.mass + Box2.mass))*Box2.vel.y;
+  %  Box2.vel.x = ((2*Ball.mass)/(Ball.mass + Box2.mass))*Ball.vel.x + ((Box2.mass - Ball.mass)/(Ball.mass + Box2.mass))*Box2.vel.x;
+  %  Box2.vel.y = ((2*Ball.mass)/(Ball.mass + Box2.mass))*Ball.vel.y + ((Box2.mass - Ball.mass)/(Ball.mass + Box2.mass))*Box2.vel.y;
 
-    Ball.vel.x = vBallX;
-    Ball.vel.y = vBallY;
-  end
+  %  Ball.vel.x = vBallX;
+  %  Ball.vel.y = vBallY;
+ % end
 
   % IMPLEMENT HANDLING OF COLLISIONS AT AN ANGLE
   % IMPLEMENT HANDLING OF COLLISIONS AT AN ANGLE
@@ -151,7 +169,7 @@ for i = 1:300
   % Handle linear friction for Boxes
   % CREATE FUNCTION TO DYNAMICALLY HANDLE FRICTION
   Box1.vel.x = handleBoxFriction(Box1.vel, Box1.mass);
-  Box2.vel.x = handleBallFriction(Box2.vel, Box2.mass);
+  Box2.vel.x = handleBoxFriction(Box2.vel, Box2.mass);
 
   % Update Vectors for next iteration  using euler for differential eqs.
   % CREATE FUNCTION TO DYNAMICALLY UPDATE POSITION

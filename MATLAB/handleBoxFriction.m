@@ -7,7 +7,7 @@ function boxVelX = handleBoxFriction(boxVel, boxMass)
    dummyVal = boxVel.x - 0.01*(boxMass);
  end
 
- if (abs(boxVelX) > 0.0001 && boxVelX < 0)
+ if (abs(boxVel.x) > 0.0001 && boxVel.x < 0)
    dummyVal = boxVel.x + 0.01*(boxMass);
  end
 
