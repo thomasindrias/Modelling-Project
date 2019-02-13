@@ -8,10 +8,10 @@ darkGrey = [0.1,0.1,0.1];
 brickRed = [0.6,0.25,0.2];
 
 % Ball properties
-Ball.pos.x = 0; % Inital position 
-Ball.pos.y = 30; % Inital position 
-Ball.vel.x = 0; % Inital position 
-Ball.vel.y = -4; % Inital position 
+Ball.pos.x = 50; % Inital position 
+Ball.pos.y = 100; % Inital position 
+Ball.vel.x = -2; % Inital position 
+Ball.vel.y = -2; % Inital position 
 Ball.mass = 1; % Weight in kilograms
 Ball.radius = 4; % ball radius
 
@@ -27,9 +27,9 @@ Floor.YMax = Floor.pos.y + (Floor.size.y/2);
 
 
 % Box1 (Brick) properties
-Box1.size.x = 20; % Initial position
-Box1.size.y = 20; % Initial position
-Box1.pos.x = 0; % Initial position
+Box1.size.x = 10; % Initial position
+Box1.size.y = 10; % Initial position
+Box1.pos.x = -60; % Initial position
 Box1.pos.y = 0; % Initial position
 Box1.vel.x = 0; % Initial speed
 Box1.vel.y = 0; % Initial speed
@@ -44,7 +44,7 @@ Box1.yMax = Box1.pos.y + (Box1.size.y/2);
 Box2.size.x = 10; % Initial position
 Box2.size.y = 10; % Initial position
 Box2.pos.x = -60; % Initial position
-Box2.pos.y = 0; % Initial position
+Box2.pos.y = -60; % Initial position
 Box2.vel.x = 0; % Initial speed
 Box2.vel.y = 0; % Initial speed
 Box2.mass = 1; % Weight in Kilograms
@@ -100,6 +100,15 @@ for i = 1:300
   [box1Collision, box1CollisionPosX, box1CollisionPosY] = boxSphereIntersect(Ball.pos, Ball.radius, Box1.pos, Box1.size);
   if box1Collision
     disp('Ball has collided with the box. DO SHIT')
+    % New implementation for ball
+    n_x = (Box1.pos.x - box1CollisionPosX)/(Box1.size.x); % This wont work completely. The equations is for sphere -> sphere
+    n_y = (Box1.pos.y - box1CollisionPosY)/(Box1.size.y); % This wont work completely. The equations is for sphere -> sphere
+
+    p = (2*(Ball.vel.x*n_x + Ball.vel.y*n_y))/(Ball.mass + Box1.mass);
+
+    % vBallX = Ball.vel.x - (p * Ball.mass * n_x) - (p * Box1.mass * n_x);
+    % vBallY = Box1.vel.y - (p * Ball.mass * n_y) - (p * Box1.mass * n_y);
+
     vBallX = ((Ball.mass - Box1.mass)/(Ball.mass + Box1.mass))*Ball.vel.x + ((2*Box1.mass)/(Ball.mass + Box1.mass))*Box1.vel.x;
     vBallY = ((Ball.mass - Box1.mass)/(Ball.mass + Box1.mass))*Ball.vel.y + ((2*Box1.mass)/(Ball.mass + Box1.mass))*Box1.vel.y;
 

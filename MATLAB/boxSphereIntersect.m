@@ -23,6 +23,6 @@ y = max(boxMinY, min(spherePos.y, boxMaxY));
 
 
 distance = (x - spherePos.x)^2 + (y - spherePos.y)^2;
-collision = distance < sphereRadius/16; % sphereRadius^2
+collision = distance < sphereRadius^2; % sphereRadius^2
 
 end
