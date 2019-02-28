@@ -69,6 +69,8 @@
       function init() {
         initGraphics(); // Camera and light setup.
         initInput(); // Inits our input (For shooting the cannon ball)
+
+        // Object creation
         var floor = createFloor(200, 200) // (floorWidth, floorDepth) -> Floor object
         createBricks(numOfBricks, floor); // Creates the bricks on our floor and adds all of them to the bricks array
         createBall() // Temporary as we are launching a ball later on so it should not be "spawned" like it is in its current state
