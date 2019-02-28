@@ -57,10 +57,13 @@
 
       // Number of bricks
       var numOfBricks = 60;
+      
       // Physics variables
       var gravityConstant = -9.8;
       var bricks = [];
       var collisionMargin = 0.005;
+      var physicsWorld;
+
 
       init();
       animate();
@@ -189,14 +192,14 @@
           // We can use userData to append any information we want
           // An example of this is the objects velocity and roation
           brick.userData.vel = new THREE.Vector3(0, 0, 0) // Initalizes velocity vector
-          brick.userData.rotation = new THREE.Vector3(0, 0, 0) // Initalizes rotation vector
+          brick.userData.rot = new THREE.Vector3(0, 0, 0) // Initalizes rotation vector
           brick.userData.mass = 2 // Sets object mass -> TODO: Randomized mass within a resonable range
           // Add: Inertia, Friction coeffficient etc...
 
           // Sets the bricks position
           //TODO: Blacklist already randomized positions to maker sure bricks don't spawn witith other bricks
           brick.position.x = Math.floor(Math.random() * (floor.userData.width/2 - (-floor.userData.width/2)) + (-floor.userData.width/2)) // Our floor is a square -> Random * (Max - Min) + Min
-          brick.position.y =  brickHeight/2 + collisionMargin; // Half the height of the brick + a margin to avoid clipping
+          brick.position.y =  brickHeight/2 + collisionMargin + 10.0; // Half the height of the brick + a margin to avoid clipping
           brick.position.z = Math.floor(Math.random() * (floor.userData.depth/2 - (-floor.userData.depth/2)) + -floor.userData.depth/2) // Our floor is a square -> Random * (Max - Min) + Min
 
           scene.add(brick)
@@ -247,15 +250,18 @@
       }
 
       function render() {
-        //var deltaTime = clock.getDelta();
+        var deltaTime = clock.getDelta();
+        //console.log(deltaTime)
         //updatePhysics(deltaTime);
 
         // This should not be done in the render function like this.
         // This should be abstracted into a function: updateBricks() or something
         for (let i = 0; i < bricks.length; i++) {
+
+          updatePhysics();
           //bricks[i] // This lets you access each brick and do operations on it
-          bricks[i].userData.vel.x += 0.01
-          bricks[i].translateX(bricks[i].userData.vel.x)
+          //bricks[i].userData.vel.y += 0.01
+          //bricks[i].translateY(bricks[i].userData.vel.y)
         }
        // brick.translateX(brick.userData.vel.x) // Movement example
        // brick.translateY(brick.userData.vel.y) // Movement example
@@ -272,6 +278,15 @@
 
         // Step world
         physicsWorld.stepSimulation(deltaTime, 10);
+
+        // This should not be done in the render function like this.
+        // This should be abstracted into a function: updateBricks() or something
+        for (let i = 0; i < bricks.length; i++) {
+
+          //bricks[i] // This lets you access each brick and do operations on it
+          bricks[i].userData.vel.y += 0.01
+          bricks[i].translateY(bricks[i].userData.vel.y)
+        }
     
       }
     </script>
