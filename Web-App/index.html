@@ -73,7 +73,7 @@
         // Object creation
         var floor = createFloor(1000, 1000) // (floorWidth, floorDepth) -> Floor object
         createBricks(numOfBricks, floor); // Creates the bricks on our floor and adds all of them to the bricks array
-        createBall() // Temporary as we are launching a ball later on so it should not be "spawned" like it is in its current state
+        //createBall() // Temporary as we are launching a ball later on so it should not be "spawned" like it is in its current state
 
         // initObjects(); // This function should contain all our intial objects (Bricks and floor) -> The ball will be rendered on keyDown/keyUp
         // initPhysics(); // We need to implement our own physics and collision detection -> This should just give bodies physics attributes
@@ -189,6 +189,7 @@
           // We can use userData to append any information we want
           // An example of this is the objects velocity and roation
           brick.userData.vel = new THREE.Vector3(0, 0, 0) // Initalizes velocity vector
+          brick.userData.acc = new THREE.Vector3(0, 0, 0) // Initalizes acceleration vector
           brick.userData.rotation = new THREE.Vector3(0, 0, 0) // Initalizes rotation vector
           brick.userData.mass = 2 // Sets object mass -> TODO: Randomized mass within a resonable range
           // Add: Inertia, Friction coeffficient etc...
