@@ -62,39 +62,17 @@
       var bricks = [];
       var collisionMargin = 0.005;
 
-      // Creating the floor
-      floorWidth = 300;
-      floorDepth = 300;
-
-      var floor = new THREE.Mesh(
-        new THREE.PlaneBufferGeometry(floorWidth, floorDepth, 8, 8),
-        new THREE.MeshPhongMaterial({ color: 0xffffff })
-      );
-      floor.material.side = 2 // Tells the renderer to show both sides of the floor
-      floor.rotation.x = Math.PI/2
-
       init();
-      // Ball
-      
-      var ballRadius = 3;
-
-      // Creating a ball
-      var ball = new THREE.Mesh(
-        new THREE.SphereBufferGeometry(ballRadius, 20, 20),
-        new THREE.MeshPhongMaterial({ color: 0x202020 })
-      );
-      ball.position.y = ballRadius + collisionMargin
-
-      
-      scene.add(ball)
-      scene.add(floor)
       animate();
 
       // Runs all our inital setup
       function init() {
         initGraphics(); // Camera and light setup.
         initInput(); // Inits our input (For shooting the cannon ball)
-        createBricks(numOfBricks); // Creates our bricks
+        var floor = createFloor(200, 200) // (floorWidth, floorDepth) -> Floor object
+        createBricks(numOfBricks, floor); // Creates the bricks on our floor and adds all of them to the bricks array
+        createBall() // Temporary as we are launching a ball later on so it should not be "spawned" like it is in its current state
+
         // initObjects(); // This function should contain all our intial objects (Bricks and floor) -> The ball will be rendered on keyDown/keyUp
         // initPhysics(); // We need to implement our own physics and collision detection -> This should just give bodies physics attributes
       }
@@ -157,45 +135,7 @@
 
         window.addEventListener("resize", onWindowResize, false);
       }
-
-      function createBricks(numOfBricks) {
-        // This creates numOfBricks bricks and appends it to the bricks array
-        for(let i = 0; i < numOfBricks; i++) {
-          
-          brickWidth = 10;
-          brickHeight = 5;
-          brickDepth = 5;
-          // Creating a brick
-          var brick = new THREE.Mesh(
-            new THREE.BoxBufferGeometry(brickWidth, brickHeight, brickDepth), // Same size on all bricks
-            createMaterial() // Randomized color
-          );
-          // We can use userData to append any information we want
-          // An example of this is the objects velocity and roation
-          brick.userData.vel = new THREE.Vector3(0, 0, 0) // Initalizes velocity vector
-          brick.userData.rotation = new THREE.Vector3(0, 0, 0) // Initalizes rotation vector
-          brick.userData.mass = 2 // Sets object mass -> TODO: Randomized mass within a resonable range
-          // Add: Inertia, Friction coeffficient etc...
-
-          // Sets the bricks position
-          //TODO: Blacklist already randomized positions to maker sure bricks don't spawn witith other bricks
-          brick.position.x = Math.floor(Math.random() * (floorWidth/2 - (-floorWidth/2)) + -floorWidth/2) // Our floor is a square -> Random * (Max - Min) + Min
-          brick.position.y =  brickHeight/2 + collisionMargin; // Half the height of the brick + a margin to avoid clipping
-          brick.position.z = Math.floor(Math.random() * (floorDepth/2 - (-floorDepth/2)) + -floorDepth/2) // Our floor is a square -> Random * (Max - Min) + Min
-
-          scene.add(brick)
-          bricks.push(brick)
-        }
-      }
-
-      function createRandomColor() {
-        return Math.floor(Math.random() * (1 << 24));
-      }
-
-      function createMaterial() {
-        return new THREE.MeshPhongMaterial({ color: createRandomColor() });
-      }
-
+      
       function initInput() {
         window.addEventListener(
           "keydown",
@@ -222,6 +162,73 @@
           },
           false
         );
+      }
+
+      function createRandomColor() {
+        return Math.floor(Math.random() * (1 << 24));
+      }
+
+      function createMaterial() {
+        return new THREE.MeshPhongMaterial({ color: createRandomColor() });
+      }
+
+      function createBricks(numOfBricks, floor) {
+        // This creates numOfBricks bricks and appends it to the bricks array
+        for(let i = 0; i < numOfBricks; i++) {
+          
+          brickWidth = 10;
+          brickHeight = 5;
+          brickDepth = 5;
+          // Creating a brick
+          var brick = new THREE.Mesh(
+            new THREE.BoxBufferGeometry(brickWidth, brickHeight, brickDepth), // Same size on all bricks
+            createMaterial() // Randomized color
+          );
+          // We can use userData to append any information we want
+          // An example of this is the objects velocity and roation
+          brick.userData.vel = new THREE.Vector3(0, 0, 0) // Initalizes velocity vector
+          brick.userData.rotation = new THREE.Vector3(0, 0, 0) // Initalizes rotation vector
+          brick.userData.mass = 2 // Sets object mass -> TODO: Randomized mass within a resonable range
+          // Add: Inertia, Friction coeffficient etc...
+
+          // Sets the bricks position
+          //TODO: Blacklist already randomized positions to maker sure bricks don't spawn witith other bricks
+          brick.position.x = Math.floor(Math.random() * (floor.userData.width/2 - (-floor.userData.width/2)) + (-floor.userData.width/2)) // Our floor is a square -> Random * (Max - Min) + Min
+          brick.position.y =  brickHeight/2 + collisionMargin; // Half the height of the brick + a margin to avoid clipping
+          brick.position.z = Math.floor(Math.random() * (floor.userData.depth/2 - (-floor.userData.depth/2)) + -floor.userData.depth/2) // Our floor is a square -> Random * (Max - Min) + Min
+
+          scene.add(brick)
+          bricks.push(brick)
+        }
+      }
+
+      function createBall() {
+        var ballRadius = 3;
+
+        // Creating a ball
+        var ball = new THREE.Mesh(
+          new THREE.SphereBufferGeometry(ballRadius, 20, 20),
+          new THREE.MeshPhongMaterial({ color: 0x202020 })
+        );
+        ball.position.y = ballRadius + collisionMargin // Static starting position. Modify this function to "launch" ball from the camera
+    
+        scene.add(ball)
+      }
+
+      function createFloor(floorWidth, floorDepth) {
+        var floor = new THREE.Mesh(
+          new THREE.PlaneBufferGeometry(floorWidth, floorDepth, 8, 8),
+          new THREE.MeshPhongMaterial({ color: 0xffffff })
+        );
+        floor.material.side = 2 // Tells the renderer to show both sides of the floor
+        floor.rotation.x = Math.PI/2
+
+        // So we can use the width in the randomizers
+        floor.userData.width = floorWidth
+        floor.userData.depth = floorDepth
+
+        scene.add(floor)
+        return floor
       }
 
       function onWindowResize() {
