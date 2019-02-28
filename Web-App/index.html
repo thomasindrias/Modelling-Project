@@ -55,37 +55,66 @@
       var textureLoader;
       var clock = new THREE.Clock();
 
-      // Global Physics variables
+      // Physics variables
       var gravityConstant = -9.8;
-      var rigidBodies = []
+      var rigidBodies = [];
+      var collisionMargin = 0.005;
 
-      // Function executes
       init();
+      // Ball
+      var ballMass = 10;
+      var ballRadius = 3;
+
+      // Creating the floor
+      var floor = new THREE.Mesh(
+        new THREE.PlaneBufferGeometry(200, 200, 8, 8),
+        new THREE.MeshPhongMaterial({ color: 0xffffff })
+      );
+      floor.material.side = 2 // Tells the renderer to show both sides of the floor
+      floor.rotation.x = Math.PI/2
+
+      // Creating a ball
+      var ball = new THREE.Mesh(
+        new THREE.SphereBufferGeometry(ballRadius, 20, 20),
+        new THREE.MeshPhongMaterial({ color: 0x202020 })
+      );
+      ball.position.y = ballRadius + collisionMargin
+
+      // Creating a brick
+      // Abstract into function to create multiple bricks at random positions
+      var brick = new THREE.Mesh(
+        new THREE.BoxBufferGeometry(10, 5, 5),
+        new THREE.MeshPhongMaterial({ color: 0x202020 })
+      );
+      brick.position.x = 30 // "A random position"
+      brick.position.y = 5/2 + collisionMargin // Half the height of the brick + a margin to avoid clipping (Currently hardcoded)
+      brick.rotation.y = Math.PI/2 // For inital testing we face the  rectangle towards the object
+      
+      scene.add(ball)
+      scene.add(floor)
+      scene.add(brick)
       animate();
 
       // Runs all our inital setup
       function init() {
         initGraphics(); // Camera and light setup.
         initInput(); // Inits our input (For shooting the cannon ball)
-
-        //initPhysics();
-        //createObjects();
+        // createObjects() // This function should contain all our intial objects (Bricks and floor) -> The ball will be rendered on keyDown/keyUp
+        // initPhysics(); // We need to implement our own physics and collision detection
       }
 
       function initGraphics() {
         container = document.getElementById("container");
 
         camera = new THREE.PerspectiveCamera(
-          60,
+          80,
           window.innerWidth / window.innerHeight,
-          0.2,
-          2000
         );
 
         scene = new THREE.Scene();
         scene.background = new THREE.Color(0xbfd1e5);
 
-        camera.position.set(-7, 5, 8);
+        camera.position.set(-24, 24, -24);
 
         controls = new THREE.OrbitControls(camera);
         controls.target.set(0, 2, 0);
@@ -192,6 +221,9 @@
 
       function updatePhysics(deltaTime) {
 
+        // Step world
+        physicsWorld.stepSimulation(deltaTime, 10);
+    
       }
              /*******
          * THIS GENERATES A WALL *
