@@ -61,6 +61,8 @@
       // Physics variables
       var gravityConstant = -9.8;
       var bricks = [];
+      var floor;
+      var rigidbodies = [];
       var collisionMargin = 0.005;
       var physicsWorld;
 
@@ -192,12 +194,8 @@
           // We can use userData to append any information we want
           // An example of this is the objects velocity and roation
           brick.userData.vel = new THREE.Vector3(0, 0, 0) // Initalizes velocity vector
-<<<<<<< HEAD
+          brick.userData.acc = new THREE.Vector3(0, -9.82, 0) // Initalizes acceleration vector
           brick.userData.rot = new THREE.Vector3(0, 0, 0) // Initalizes rotation vector
-=======
-          brick.userData.acc = new THREE.Vector3(0, 0, 0) // Initalizes acceleration vector
-          brick.userData.rotation = new THREE.Vector3(0, 0, 0) // Initalizes rotation vector
->>>>>>> 7e0157a9a63c831a3060a5c55d8d69b38ab7b081
           brick.userData.mass = 2 // Sets object mass -> TODO: Randomized mass within a resonable range
           // Add: Inertia, Friction coeffficient etc...
 
@@ -226,7 +224,7 @@
       }
 
       function createFloor(floorWidth, floorDepth) {
-        var floor = new THREE.Mesh(
+        floor = new THREE.Mesh(
           new THREE.PlaneBufferGeometry(floorWidth, floorDepth, 8, 8),
           new THREE.MeshPhongMaterial({ color: 0xffffff })
         );
@@ -239,6 +237,14 @@
 
         scene.add(floor)
         return floor
+      }
+
+
+      //Create rigid bodies 
+      function createRigidBody( threeObject, physicsShape, mass, pos, quat ) {
+        
+
+
       }
 
       function onWindowResize() {
@@ -257,17 +263,8 @@
       function render() {
         var deltaTime = clock.getDelta();
         //console.log(deltaTime)
-        //updatePhysics(deltaTime);
+        updatePhysics(deltaTime);
 
-        // This should not be done in the render function like this.
-        // This should be abstracted into a function: updateBricks() or something
-        for (let i = 0; i < bricks.length; i++) {
-
-          updatePhysics();
-          //bricks[i] // This lets you access each brick and do operations on it
-          //bricks[i].userData.vel.y += 0.01
-          //bricks[i].translateY(bricks[i].userData.vel.y)
-        }
        // brick.translateX(brick.userData.vel.x) // Movement example
        // brick.translateY(brick.userData.vel.y) // Movement example
        // brick.translateZ(brick.userData.vel.z) // Movement example
@@ -282,15 +279,39 @@
       function updatePhysics(deltaTime) {
 
         // Step world
-        physicsWorld.stepSimulation(deltaTime, 10);
+        //physicsWorld.stepSimulation(deltaTime, 10);
 
         // This should not be done in the render function like this.
         // This should be abstracted into a function: updateBricks() or something
         for (let i = 0; i < bricks.length; i++) {
+          
+          //trying to implement rigidbody
+          if(bricks[i].position.y - bricks[i].geometry.parameters.height/2 < floor.position.y + collisionMargin && bricks[i].userData.vel.y < 0) {
+            console.log("boom");
+
+            bricks[i].userData.vel.y *= -0.5; //bouncyyy
+
+            bricks[i].position.y = floor.position.y + collisionMargin + bricks[i].geometry.parameters.height/2; //move 'em back up
+          }
+
+          //time += deltaTime;
+          //time step boii
+          bricks[i].translateY(bricks[i].userData.vel.y + deltaTime * bricks[i].userData.acc.y / 2);
+          bricks[i].userData.vel.y += deltaTime * bricks[i].userData.acc.y;
+
+
+          /* ------------PSEUDO-CODE-------------------- 
+            acceleration = force(time, position, velocity) / mass;
+            time += timestep;
+            position += timestep * (velocity + timestep * acceleration / 2);
+            velocity += timestep * acceleration;
+            newAcceleration = force(time, position, velocity) / mass;
+            velocity += timestep * (newAcceleration - acceleration) / 2;
+            -------------------------------------------  */
 
           //bricks[i] // This lets you access each brick and do operations on it
-          bricks[i].userData.vel.y += 0.01
-          bricks[i].translateY(bricks[i].userData.vel.y)
+          //bricks[i].userData.vel.y += 0.01
+          //bricks[i].translateY(bricks[i].userData.vel.y)
         }
     
       }
