@@ -174,7 +174,8 @@
           // An example of this is the objects velocity and roation
           brick.userData.vel = new THREE.Vector3(0, 0, 0) // Initalizes velocity vector
           brick.userData.rotation = new THREE.Vector3(0, 0, 0) // Initalizes rotation vector
-          brick.userData.mass = 2 // Sets object mass
+          brick.userData.mass = 2 // Sets object mass -> TODO: Randomized mass within a resonable range
+          // Add: Inertia, Friction coeffficient etc...
 
           // Sets the bricks position
           //TODO: Blacklist already randomized positions to maker sure bricks don't spawn witith other bricks
