@@ -94,7 +94,7 @@
       function init() {
         initGraphics(); // Camera and light setup.
         initInput(); // Inits our input (For shooting the cannon ball)
-        createBricks(numOfBricks); 
+        createBricks(numOfBricks); // Creates our bricks
         // initObjects(); // This function should contain all our intial objects (Bricks and floor) -> The ball will be rendered on keyDown/keyUp
         // initPhysics(); // We need to implement our own physics and collision detection -> This should just give bodies physics attributes
       }
@@ -241,6 +241,8 @@
         //var deltaTime = clock.getDelta();
         //updatePhysics(deltaTime);
 
+        // This should not be done in the render function like this.
+        // This should be abstracted into a function: updateBricks() or something
         for (let i = 0; i < bricks.length; i++) {
           //bricks[i] // This lets you access each brick and do operations on it
           bricks[i].userData.vel.x += 0.01
