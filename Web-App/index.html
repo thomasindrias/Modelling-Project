@@ -56,7 +56,7 @@
       var clock = new THREE.Clock();
 
       // Number of bricks
-      var numOfBricks = 10;
+      var numOfBricks = 5;
       // Physics variables
       var gravityConstant = -9.8;
       var bricks = [];
@@ -240,6 +240,10 @@
       function render() {
         //var deltaTime = clock.getDelta();
         //updatePhysics(deltaTime);
+
+        for (let i = 0; i < bricks.length; i++) {
+          //bricks[i] // This lets you access each brick and do operations on it
+        }
        // brick.translateX(brick.userData.vel.x) // Movement example
        // brick.translateY(brick.userData.vel.y) // Movement example
        // brick.translateZ(brick.userData.vel.z) // Movement example
