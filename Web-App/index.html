@@ -111,7 +111,7 @@
         scene = new THREE.Scene();
         scene.background = new THREE.Color(0xbfd1e5);
 
-        camera.position.set(-24, 24, -24);
+        camera.position.set(-100, 200, -100);
 
         controls = new THREE.OrbitControls(camera);
         controls.target.set(0, 2, 0);
@@ -243,6 +243,8 @@
 
         for (let i = 0; i < bricks.length; i++) {
           //bricks[i] // This lets you access each brick and do operations on it
+          bricks[i].userData.vel.x += 0.1
+          bricks[i].translateX(bricks[i].userData.vel.x)
         }
        // brick.translateX(brick.userData.vel.x) // Movement example
        // brick.translateY(brick.userData.vel.y) // Movement example
