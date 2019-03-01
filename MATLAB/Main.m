@@ -117,7 +117,7 @@ for i = 1:300
     %atan2d(Box1.normal.right(2) - Ball.vel.y, Box1.normal.right(1) - Ball.vel.x) % I THINK IT WORK
 
     theta = 180-rad2deg(acos(dot([Ball.vel.x, Ball.vel.y], [Box1.normal.right(1), Box1.normal.right(2)])/(norm([Ball.vel.x, Ball.vel.y])*norm([Box1.normal.right(1), Box1.normal.right(2)]))))
-    ää
+
     % dot([Ball.pos.x - box1CollisionPosX, Ball.pos.y - box1CollisionPosY, 0].*[Box1.normal.right(1), Box1.normal.right(2), 0])/(norm([Ball.pos.x - box1CollisionPosX, Ball.pos.y - box1CollisionPosY, 0])*norm([Box1.normal.right(1), Box1.normal.right(2), 0]))
     
     % This will return the angle between a chosen normal and the velocity vector.

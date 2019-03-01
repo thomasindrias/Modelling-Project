@@ -56,7 +56,7 @@
       var clock = new THREE.Clock();
 
       // Number of bricks
-      var numOfBricks = 100;
+      var numOfBricks = 20;
       
       // Physics variables
       var gravityConstant = -9.8;
@@ -65,6 +65,7 @@
       var rigidbodies = [];
       var collisionMargin = 0.005;
       var physicsWorld;
+      var time = 0.000001;
 
 
       init();
@@ -76,9 +77,18 @@
         initInput(); // Inits our input (For shooting the cannon ball)
 
         // Object creation
-        var floor = createFloor(1000, 1000, 3) // (floorWidth, floorDepth) -> Floor object
-        createBricks(numOfBricks, floor); // Creates the bricks on our floor and adds all of them to the bricks array
+        var floor = createFloor(1000, 3, 1000) // (floorWidth, floorDepth) -> Floor object
+        //createBricks(numOfBricks, floor); // Creates the bricks on our floor and adds all of them to the bricks array
         //createBall() // Temporary as we are launching a ball later on so it should not be "spawned" like it is in its current state
+        // Walls
+        createBrick(40, 60, 940, 500, 20, 0, 0, 0, 0, 2000)
+        createBrick(40, 60, 940, -500, 20, 0, 0, 0, 0, 2000)
+        createBrick(940, 60, 40, 0, 20, 500, 0, 0, 0, 2000)
+        createBrick(940, 60, 40, 0, 20, -500, 0, 0, 0, 2000)
+
+
+        createBrick(20, 20, 20, 0, 20, 0, 2, 1, 1, 1)
+        createBrick(20, 20, 20, 0, 20, 40, 1, 2, 1, 1)
 
         // initObjects(); // This function should contain all our intial objects (Bricks and floor) -> The ball will be rendered on keyDown/keyUp
         // initPhysics(); // We need to implement our own physics and collision detection -> This should just give bodies physics attributes
@@ -96,10 +106,10 @@
         scene = new THREE.Scene();
         scene.background = new THREE.Color(0xbfd1e5);
 
-        camera.position.set(600, 50, -200);
+        camera.position.set(200, 200, -10);
 
         controls = new THREE.OrbitControls(camera);
-        controls.target.set(400, 0, 0);
+        controls.target.set(0, 0, 300);
         controls.update();
 
         renderer = new THREE.WebGLRenderer();
@@ -183,9 +193,9 @@
         // This creates numOfBricks bricks and appends it to the bricks array
         for(let i = 0; i < numOfBricks; i++) {
           
-          brickWidth = 10;
-          brickHeight = 5;
-          brickDepth = 5;
+          brickWidth = 10*4;
+          brickHeight = 5*4;
+          brickDepth = 5*4;
           // Creating a brick
           var brick = new THREE.Mesh(
             new THREE.BoxBufferGeometry(brickWidth, brickHeight, brickDepth), // Same size on all bricks
@@ -193,24 +203,47 @@
           );
           // We can use userData to append any information we want
           // An example of this is the objects velocity and roation
-          brick.userData.vel = new THREE.Vector3(0, 0, 0) // Initalizes velocity vector
-          brick.userData.acc = new THREE.Vector3(1, 10*gravityConstant, 0) // Initalizes acceleration vector
+          brick.userData.vel = new THREE.Vector3(Math.random()*3, 0, Math.random()*3) // Initalizes velocity vector
+          brick.userData.acc = new THREE.Vector3(0, 10*gravityConstant, 0) // Initalizes acceleration vector
           brick.userData.rot = new THREE.Vector3(0, 0, 0) // Initalizes rotation vector
-          brick.userData.mass = 2 // Sets object mass -> TODO: Randomized mass within a resonable range
+          brick.userData.mass = Math.random()*3 // Sets object mass -> TODO: Randomized mass within a resonable range
           brick.userData.isFloor = false
           // Add: Inertia, Friction coeffficient etc...
 
           // Sets the bricks position
           //TODO: Blacklist already randomized positions to maker sure bricks don't spawn witith other bricks
           brick.position.x = Math.floor(Math.random() * (floor.userData.width/2 - (-floor.userData.width/2)) + (-floor.userData.width/2)) // Our floor is a square -> Random * (Max - Min) + Min
-          brick.position.y =  floor.position.y + floor.geometry.parameters.depth + 200; // Half the height of the brick + a margin to avoid clipping
-          brick.position.z = Math.floor(Math.random() * (floor.userData.height/2 - (-floor.userData.height/2)) + -floor.userData.height/2) // Our floor is a square -> Random * (Max - Min) + Min
-
+          brick.position.y =  floor.userData.height + brickHeight;
+          brick.position.z = Math.floor(Math.random() * (floor.userData.depth/2 - (-floor.userData.depth/2)) + -floor.userData.depth/2) // Our floor is a square -> Random * (Max - Min) + Min
+          
           scene.add(brick)
           bricks.push(brick)
         }
       }
 
+      function createBrick(brickWidth, brickHeight, brickDepth, brickX, brickY, brickZ, brickVelX, brickVelY, brickVelZ, brickMass) {
+        // This creates singel bricks and appends it to the bricks array
+          // Creating a brick
+          var brick = new THREE.Mesh(
+            new THREE.BoxBufferGeometry(brickWidth, brickHeight, brickDepth), // Same size on all bricks
+            createMaterial() // Randomized color
+          );
+          // We can use userData to append any information we want
+          // An example of this is the objects velocity and roation
+          brick.userData.vel = new THREE.Vector3(brickVelX, brickVelY, brickVelZ) // Initalizes velocity vector
+          brick.userData.acc = new THREE.Vector3(0, 10*gravityConstant, 0) // Initalizes acceleration vector
+          brick.userData.rot = new THREE.Vector3(0, 0, 0) // Initalizes rotation vector
+          brick.userData.mass = brickMass // Sets object mass -> TODO: Randomized mass within a resonable range
+          brick.userData.isFloor = false
+          // Add: Inertia, Friction coeffficient etc...
+
+          brick.position.x = brickX;
+          brick.position.y = floor.userData.height + brickHeight;
+          brick.position.z = brickZ;
+
+          scene.add(brick)
+          bricks.push(brick)
+      }
       function createBall() {
         var ballRadius = 3;
 
@@ -230,8 +263,7 @@
           new THREE.MeshPhongMaterial({ color: 0xffffff })
         );
         floor.material.side = 2 // Tells the renderer to show both sides of the floor
-        floor.rotation.x = Math.PI/2
-
+        console.log(floor.position.y)
         // So we can use the width in the randomizers
         floor.userData.width = floorWidth
         floor.userData.height = floorHeight
@@ -251,18 +283,18 @@
         var r2 = {};
 
         r1.minX = br1.position.x - br1.geometry.parameters.width/2;
-        r1.minY = br1.position.y - br1.geometry.parameters.depth/2;
-        r1.minZ = br1.position.z - br1.geometry.parameters.height/2;
+        r1.minY = br1.position.y - br1.geometry.parameters.height/2;
+        r1.minZ = br1.position.z - br1.geometry.parameters.depth/2;
         r1.maxX = br1.position.x + br1.geometry.parameters.width/2;
-        r1.maxY = br1.position.y + br1.geometry.parameters.depth/2;
-        r1.maxZ = br1.position.z + br1.geometry.parameters.height/2;
+        r1.maxY = br1.position.y + br1.geometry.parameters.height/2;
+        r1.maxZ = br1.position.z + br1.geometry.parameters.depth/2;
 
         r2.minX = br2.position.x - br2.geometry.parameters.width/2;
-        r2.minY = br2.position.y - br2.geometry.parameters.depth/2;
-        r2.minZ = br2.position.z - br2.geometry.parameters.height/2;
+        r2.minY = br2.position.y - br2.geometry.parameters.height/2;
+        r2.minZ = br2.position.z - br2.geometry.parameters.depth/2;
         r2.maxX = br2.position.x + br2.geometry.parameters.width/2;
-        r2.maxY = br2.position.y + br2.geometry.parameters.depth/2;
-        r2.maxZ = br2.position.z + br2.geometry.parameters.height/2;
+        r2.maxY = br2.position.y + br2.geometry.parameters.height/2;
+        r2.maxZ = br2.position.z + br2.geometry.parameters.depth/2;
 
         if (r1.minX <= r2.maxX && r1.maxX >= r2.minX &&
             r1.minY <= r2.maxY && r1.maxY >= r2.minY &&
@@ -273,8 +305,56 @@
         else{
           return false
         }
-        
+      }
 
+      function collisionVelocity(br1,br2) {
+        v1u1 = new THREE.Vector3()
+        v1u2 = new THREE.Vector3()
+        v2u1 = new THREE.Vector3()
+        v2u2 = new THREE.Vector3()
+        res1 = new THREE.Vector3()
+        res2 = new THREE.Vector3()
+
+        v1u1.addScaledVector(br1.userData.vel, (br1.userData.mass-br2.userData.mass)/(br1.userData.mass+br2.userData.mass))
+        v1u2.addScaledVector(br2.userData.vel, (2*br2.userData.mass)/(br1.userData.mass+br2.userData.mass))
+
+        v2u1.addScaledVector(br1.userData.vel, (2*br1.userData.mass)/(br1.userData.mass+br2.userData.mass))
+        v2u2.addScaledVector(br2.userData.vel, (br2.userData.mass-br1.userData.mass)/(br1.userData.mass+br2.userData.mass))
+
+        br1.userData.vel = res1.addVectors(v1u1, v1u2)
+        br2.userData.vel = res2.addVectors(v2u1, v2u2)
+
+        // .angleTo (v: Vector3) -> Returns the angle between this vector and vector v in radians. 
+        // .clamp ( min : Vector3, max : Vector3 ) -> Returns collision point
+        // .reflect ( normal : Vector3 ) -> the normal to the reflecting plane
+
+        test1 = new THREE.Vector3()
+        test2 = new THREE.Vector3()
+        var r1 = {};
+        var r2 = {};
+
+        r1.minX = br1.position.x - br1.geometry.parameters.width/2;
+        r1.minY = br1.position.y - br1.geometry.parameters.height/2;
+        r1.minZ = br1.position.z - br1.geometry.parameters.depth/2;
+        r1.maxX = br1.position.x + br1.geometry.parameters.width/2;
+        r1.maxY = br1.position.y + br1.geometry.parameters.height/2;
+        r1.maxZ = br1.position.z + br1.geometry.parameters.depth/2;
+
+        r2.minX = br2.position.x - br2.geometry.parameters.width/2;
+        r2.minY = br2.position.y - br2.geometry.parameters.height/2;
+        r2.minZ = br2.position.z - br2.geometry.parameters.depth/2;
+        r2.maxX = br2.position.x + br2.geometry.parameters.width/2;
+        r2.maxY = br2.position.y + br2.geometry.parameters.height/2;
+        r2.maxZ = br2.position.z + br2.geometry.parameters.depth/2;
+
+        test1 = new THREE.Vector3(r1.minX, r1.minY, r1.minZ)
+        test2 = new THREE.Vector3(r1.maxX, r1.maxY, r1.maxZ)
+        testPos = new THREE.Vector3()
+        testNormal = new THREE.Vector3()
+        testPos = br2.clone()
+        console.log(br1)
+        //testNormal.reflect(testPos.position.clamp(test1, test2))
+        console.log(testNormal.reflect(testPos.position.clamp(test1, test2)))
       }
 
       function onWindowResize() {
@@ -306,12 +386,7 @@
         renderer.render(scene, camera);
       }
 
-      function updatePhysics(deltaTime) {
-
-        // Step world
-        //physicsWorld.stepSimulation(deltaTime, 10);
-        // Check if anything is colliding
-        
+      function updatePhysics(deltaTime) {        
         // This should not be done in the render function like this.
         // This should be abstracted into a function: updateBricks() or something
         for (let i = 0; i < bricks.length-1; i++) {
@@ -320,10 +395,9 @@
             // If two bricks collide
             if (detectBrickCollision(bricks[i], bricks[j])) { // For more exact position -> This should do another check with more exact values for no clipping
               if(i == 0) {
-                // if i = 0 and we get a collision it means that brick J has collided with the floor
-                bricks[j].userData.vel.y = 0;
+                bricks[j].userData.vel.setY(0);
               } else {
-                // if i != 0 and we get a collision it means that brick I and brick J has collided
+                collisionVelocity(bricks[i], bricks[j]) // This function sets resulting collision velocity
               }
             }
           }
@@ -332,10 +406,14 @@
         for (let i = 1; i < bricks.length; i++) {
           bricks[i].translateX(bricks[i].userData.vel.x)
           bricks[i].translateY(bricks[i].userData.vel.y)
+          bricks[i].translateZ(bricks[i].userData.vel.z)
 
-          bricks[i].userData.vel.x += deltaTime * bricks[i].userData.acc.x;
-          bricks[i].userData.vel.y = deltaTime * bricks[i].userData.acc.y;
+          updateStep(bricks[i], deltaTime);
           
+          /*bricks[i].userData.vel.x += deltaTime * bricks[i].userData.acc.x;
+          bricks[i].userData.vel.y = deltaTime * bricks[i].userData.acc.y;
+          bricks[i].userData.vel.z += deltaTime * bricks[i].userData.acc.z;
+          */
         }
           //time += deltaTime;
           //time step boii
@@ -355,21 +433,38 @@
           //bricks[i].translateY(bricks[i].userData.vel.y)
     
       }
-      function updateStep(brick) {
 
-        /*
-        brick.userData.acc = vector3(force(time, position, velocity) / mass, ,);
-        //time += timestep;
-        position += timestep * (velocity + timestep * acceleration / 2);
-        velocity += timestep * acceleration;
-        newAcceleration = force(time, position, velocity) / mass;
-        velocity += timestep * (newAcceleration - acceleration) / 2;
-        */
-      }
+    function updateStep(brick, timestep) {
+
+      var newAcceleration = new THREE.Vector3(0,0,0);
+
+      brick.userData.acc.x = force(time, brick.position.x, brick.userData.vel.x) / brick.userData.mass;
+      brick.userData.acc.y = (force(time, brick.position.y, brick.userData.vel.y)) / brick.userData.mass + gravityConstant;
+      brick.userData.acc.z = force(time, brick.position.z, brick.userData.vel.z) / brick.userData.mass;
+
+      time += timestep;
+    
+      brick.position.x += timestep * (brick.userData.vel.x + timestep * brick.userData.acc.x / 2);
+      brick.position.y += timestep * (brick.userData.vel.y + timestep * brick.userData.acc.y / 2);
+      brick.position.z += timestep * (brick.userData.vel.z + timestep * brick.userData.acc.z / 2);
       
-      function force (time, position, velocity){
-        
-      }
+      brick.userData.vel.x += timestep * brick.userData.acc.x;
+      brick.userData.vel.y += timestep * brick.userData.acc.y;
+      brick.userData.vel.z += timestep * brick.userData.acc.z;
+
+      newAcceleration.x = force(time, brick.position.x, brick.userData.vel.x) / brick.userData.mass;
+      newAcceleration.y = force(time, brick.position.y, brick.userData.vel.y) / brick.userData.mass;
+      newAcceleration.z = force(time, brick.position.z, brick.userData.vel.z) / brick.userData.mass;
+
+      brick.userData.vel.x += timestep * (newAcceleration.x - brick.userData.acc.x) / 2;
+      brick.userData.vel.y += timestep * (newAcceleration.y - brick.userData.acc.y) / 2;
+      brick.userData.vel.z += timestep * (newAcceleration.z - brick.userData.acc.z) / 2;
+      
+    }
+
+    function force(time, position, velocity) {
+      return velocity/time;
+    }
 
     </script>
   </body>
