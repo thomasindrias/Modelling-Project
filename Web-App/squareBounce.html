@@ -166,7 +166,9 @@
       var camera, controls, scene, renderer;
       var textureLoader;
       var clock = new THREE.Clock();
-      
+
+      var mouseCoords = new THREE.Vector2();
+      var raycaster = new THREE.Raycaster();
 
 
       init();
@@ -272,6 +274,15 @@
           },
           false
         );
+
+        window.addEventListener('mouseup', function (event) {
+          mouseCoords.set(
+            (event.clientX / window.innerWidth) * 2 - 1,
+            - (event.clientY / window.innerHeight) * 2 + 1
+          );
+
+          launchCube()
+        }, false);
       }
 
       function createRandomColor() {
@@ -281,41 +292,43 @@
         return Math.floor(Math.random() * end) + start  
       }
       function launchCube() {
-      // Points
-      // Pos(3), PrevPos(3), FloorPos(3)
-      let randomLowMin = 1;
-      let randomLowMax = 30;
-
-      let randomHighMin = 30;
-      let randomHighMax = 70;
-
-      let hightMultiplyer = 1.5;
-  
-
-      let point1 = new Point(10, 10, 10, randomizeInterval(8, 10), randomizeInterval(randomLowMin, randomLowMax), randomizeInterval(randomLowMin, randomLowMax));
+      
+      // get raycast info from current view
+      raycaster.setFromCamera(mouseCoords, camera)
+      let pos = new THREE.Vector3(); // origin position of raycast
+      let dir = new THREE.Vector3(); // direction of raycast
+      
+      // quick maths
+      pos.copy(raycaster.ray.direction);
+      pos.add(raycaster.ray.origin);
+      dir.copy(raycaster.ray.direction);
+      dir.multiplyScalar(1) // change this to go 🐎💨
+      
+      
+      let point1 = new Point(pos.x + 30, pos.y + 30, pos.z + 30, pos.x + 30 - (30 * dir.x), pos.y + 30 - (30 * dir.y), pos.z + 30 - (30 * dir.z));
       pointArray.push(point1)
 
-      let point2 = new Point(50, 10, 10, randomizeInterval(randomHighMin, randomHighMax), randomizeInterval(randomLowMin, randomLowMax), randomizeInterval(randomLowMin, randomLowMax));
+      let point2 = new Point(pos.x - 30, pos.y + 30, pos.z + 30, pos.x - 30 - (30 * dir.x), pos.y + 30 - (30 * dir.y), pos.z + 30 - (30 * dir.z));
       pointArray.push(point2)
 
-      let point3 = new Point(50, 10, 50, 52, 4, 50);
+      let point3 = new Point(pos.x - 30, pos.y + 30, pos.z - 30, pos.x - 30, pos.y + 30, pos.z - 30);
       pointArray.push(point3)
 
-      let point4 = new Point(10, 10, 50, 10, 4, 50);
+      let point4 = new Point(pos.x + 30, pos.y + 30, pos.z - 30, pos.x + 30, pos.y + 30, pos.z - 30);
       pointArray.push(point4)
 
-      let point5 = new Point(10, 50, 10, 10, 22, 10);
+      let point5 = new Point(pos.x + 30, pos.y - 30, pos.z + 30, pos.x + 30, pos.y - 30, pos.z + 30);
       pointArray.push(point5)
 
-      let point6 = new Point(50, 50, 10, 50, 32, 30);
+      let point6 = new Point(pos.x - 30, pos.y - 30, pos.z + 30, pos.x - 30, pos.y - 30, pos.z + 30);
       pointArray.push(point6)
 
-      let point7 = new Point(50, 50, 50, 55, 32, 44);
+      let point7 = new Point(pos.x - 30, pos.y - 30, pos.z - 30, pos.x - 30, pos.y - 30, pos.z - 30);
       pointArray.push(point7)
 
-      let point8 = new Point(10, 50, 50, 4, 32, 50);
-
+      let point8 = new Point(pos.x + 30, pos.y - 30, pos.z - 30, pos.x + 30, pos.y - 30, pos.z - 30);
       pointArray.push(point8)
+        
 
       // Sticks
       // Pos(3), PrevPos(3), FloorPos(3)
