@@ -32,7 +32,7 @@
   </head>
 
   <body>
-    <div id="info">Press 🐌 to throw the dice...</div>
+    <div id="info">Press Q to throw the "dice"...</div>
     <div id="container"><br /><br /><br /><br /><br />Loading...</div>
 
     <script src="js/three.js"></script>
@@ -429,9 +429,6 @@
         var deltaTime = clock.getDelta();
 
         renderer.render(scene, camera);
-
-        renderer.shadowMap.enabled = true;
-        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
       }
     </script>
   </body>
