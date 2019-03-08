@@ -1,0 +1,215 @@
+<html lang="en">
+  <head>
+    <title>Object Collision Simulator</title>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"
+    />
+    <style>
+      body {
+        color: #61443e;
+        font-family: Monospace;
+        font-size: 13px;
+        text-align: center;
+
+        background-color: #bfd1e5;
+        margin: 0px;
+        overflow: hidden;
+      }
+
+      #info {
+        position: absolute;
+        top: 0px;
+        width: 100%;
+        padding: 5px;
+      }
+
+      a {
+        color: #a06851;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="info">Press mb1 to throw the dice...</div>
+    <div id="container"><br /><br /><br /><br /><br />Loading...</div>
+
+    <script src="js/three.js"></script>
+    <script src="js/controls/OrbitControls.js"></script>
+    <script src="js/WebGL.js"></script>
+    <script src="js/libs/stats.min.js"></script>
+
+    <script>
+
+      class Point {
+        constructor(x, y, z, oldX, oldY, oldZ) {
+          this.position = new THREE.Vector3(x, y, z);
+          this.previousPosition = new THREE.Vector3(oldX, oldY, oldZ);
+          this.velocity = new THREE.Vector3();
+
+          this.friction = 0.5;
+          this.bounce = 2.7;
+        }
+
+        update() {
+          /*
+          * Whatever needs updating.
+          */ 
+        }
+        
+        collisionCheck() {
+          /*
+          * Check collision with ground.
+          */ 
+        }
+        
+        animate() {
+          /*
+          * Whatever needs drawed or animated.
+          */
+        }
+      }
+      let point = new Point()
+      console.log(point.position)
+      
+      // Detects webgl
+      if (WEBGL.isWebGLAvailable() === false) {
+        document.body.appendChild(WEBGL.getWebGLErrorMessage());
+        document.getElementById("container").innerHTML = "";
+      }
+
+      // Graphics variables
+      var container, stats;
+      var camera, controls, scene, renderer;
+      var textureLoader;
+      var clock = new THREE.Clock();
+      
+      // Physics variables
+      var gravityConstant = -9.8;
+
+
+      init();
+      animate();
+
+      // Runs all our inital setup
+      function init() {
+        initGraphics(); // Camera and light setup.
+        initInput(); // Inits our input (For shooting the cannon ball)
+      }
+
+      function initGraphics() {
+        container = document.getElementById("container");
+
+        camera = new THREE.PerspectiveCamera(
+          80,
+          window.innerWidth / window.innerHeight,
+        );
+        
+
+        scene = new THREE.Scene();
+        scene.background = new THREE.Color(0xbfd1e5);
+
+        camera.position.set(200, 200, -10);
+
+        controls = new THREE.OrbitControls(camera);
+        controls.target.set(0, 0, 300);
+        controls.update();
+
+        renderer = new THREE.WebGLRenderer();
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
+
+        textureLoader = new THREE.TextureLoader();
+
+        var ambientLight = new THREE.AmbientLight(0x404040);
+        scene.add(ambientLight);
+
+        var light = new THREE.DirectionalLight(0xffffff, 1);
+        light.position.set(-10, 10, 5);
+        light.castShadow = true;
+        var d = 10;
+        light.shadow.camera.left = -d;
+        light.shadow.camera.right = d;
+        light.shadow.camera.top = d;
+        light.shadow.camera.bottom = -d;
+
+        light.shadow.camera.near = 2;
+        light.shadow.camera.far = 50;
+
+        light.shadow.mapSize.x = 1024;
+        light.shadow.mapSize.y = 1024;
+
+        scene.add(light);
+
+        container.innerHTML = "";
+
+        container.appendChild(renderer.domElement);
+
+        stats = new Stats();
+        stats.domElement.style.position = "absolute";
+        stats.domElement.style.top = "0px";
+        container.appendChild(stats.domElement);
+
+        //
+
+        window.addEventListener("resize", onWindowResize, false);
+      }
+      
+      function initInput() {
+        window.addEventListener(
+          "keydown",
+          function(event) {
+            switch (event.keyCode) {
+              // Q
+              case 81:
+                // armMovement = 1;
+                break;
+
+              // A
+              case 65:
+                // armMovement = -1;
+                break;
+            }
+          },
+          false
+        );
+
+        window.addEventListener(
+          "keyup",
+          function() {
+            // armMovement = 0;
+          },
+          false
+        );
+      }
+
+      function createRandomColor() {
+        return Math.floor(Math.random() * (1 << 24));
+      }
+
+      function onWindowResize() {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      }
+
+      function animate() {
+        requestAnimationFrame(animate);
+
+        render();
+      }
+
+      function render() {
+        var deltaTime = clock.getDelta();
+
+        renderer.render(scene, camera);
+      }
+    </script>
+  </body>
+</html>
+
+
+
