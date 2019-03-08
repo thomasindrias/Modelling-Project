@@ -1,6 +1,6 @@
 <html lang="en">
   <head>
-    <title>Object Collision Simulator</title>
+    <title>Cube Throwing Simulator</title>
     <meta charset="utf-8" />
     <meta
       name="viewport"
@@ -32,7 +32,7 @@
   </head>
 
   <body>
-    <div id="info">Press mb1 to throw the dice...</div>
+    <div id="info">Press 🐌 to throw the dice...</div>
     <div id="container"><br /><br /><br /><br /><br />Loading...</div>
 
     <script src="js/three.js"></script>
@@ -46,33 +46,115 @@
         constructor(x, y, z, oldX, oldY, oldZ) {
           this.position = new THREE.Vector3(x, y, z);
           this.previousPosition = new THREE.Vector3(oldX, oldY, oldZ);
+          this.floor = new THREE.Vector3(0, 0, 0);
           this.velocity = new THREE.Vector3();
 
-          this.friction = 0.5;
-          this.bounce = 2.7;
+          console.log('A little bug 🐞');
+          
+          // PhysVars
+          this.friction = 0.1;
+          this.bounce = 2;
+          this.gravity = new THREE.Vector3(0, -0.2, 0);
+
+          //Mesh creation
+          this.createAndPushMesh()
         }
 
         update() {
-          /*
-          * Whatever needs updating.
-          */ 
+          this.velocity.setX(this.position.x - this.previousPosition.x);
+          this.velocity.setY(this.position.y - this.previousPosition.y);
+          this.velocity.setZ(this.position.z - this.previousPosition.z);
+          
+          // We get a "new" old position
+          this.previousPosition.copy(this.position);
+
+          // We set the new actual position
+          this.position.add(this.velocity);
+          this.position.add(this.gravity);
         }
         
-        collisionCheck() {
-          /*
-          * Check collision with ground.
-          */ 
+        updateCollision() {
+          this.velocity.copy(this.position);
+          this.velocity.sub(this.previousPosition);
+          this.velocity.multiplyScalar(this.friction);
+          
+          // Collision with ground
+          if (this.position.y < 0) {
+            var temp3 = new THREE.Vector3();
+            temp3.setY(this.position.y + (this.velocity.y * this.bounce))
+            temp3.setX((this.position.x - this.previousPosition.x) * this.friction)
+            temp3.setZ((this.position.z - this.previousPosition.z) * this.friction)
+          
+            this.position.setY(this.floor.y);
+            this.previousPosition.add(temp3);
+          } 
+          
+        }
+        createAndPushMesh() {
+          let geometry = new THREE.SphereBufferGeometry( 1, 32, 32 );
+          let material = new THREE.MeshBasicMaterial( {color: createRandomColor()} );
+          let sphere = new THREE.Mesh( geometry, material );
+
+          pointMeshArray.push(sphere)
+          scene.add(sphere);
         }
         
-        animate() {
-          /*
-          * Whatever needs drawed or animated.
-          */
-        }
       }
-      let point = new Point()
-      console.log(point.position)
       
+      class Stick {
+        
+        constructor(pointA, pointB) {
+          this.pointA = pointA;
+          this.pointB = pointB;
+
+          this.vTemp = new THREE.Vector3();
+          this.vTemp.copy(pointB.position)
+          this.vTemp.sub(pointA.position)
+          this.size = this.getSize(this.vTemp)
+          
+          this.createAndPushMesh()
+        }
+
+        setPointA(point) {
+          this.pointA = point;
+        }
+        
+        setPointB(point) {
+          this.pointB = point;
+        }
+
+        getSize(vTemp) {
+          return Math.sqrt(vTemp.x * vTemp.x + vTemp.y * vTemp.y + vTemp.z * vTemp.z);       
+        }
+        createAndPushMesh() {
+          // Lines
+          let material = new THREE.LineBasicMaterial( { color: createRandomColor() } );
+          let geometry = new THREE.Geometry();
+          geometry.vertices.push(this.pointA.position);
+          geometry.vertices.push(this.pointB.position);
+          let line = new THREE.Line( geometry, material );
+          lineMeshArray.push(line)
+          scene.add(line);
+        }
+
+        update() {
+          this.vTemp.copy(this.pointB.position)
+          this.vTemp.sub(this.pointA.position)
+          let currentSize = this.getSize(this.vTemp)
+          let dif = (currentSize - this.size) * 0.5;
+          this.vTemp.normalize()
+          this.vTemp.multiplyScalar(dif)
+          
+          this.pointA.position.add(this.vTemp)
+          this.pointB.position.sub(this.vTemp)
+        }
+
+      }
+      var pointArray = []
+      var stickArray = []
+      var pointMeshArray = []
+      var lineMeshArray = []
+
       // Detects webgl
       if (WEBGL.isWebGLAvailable() === false) {
         document.body.appendChild(WEBGL.getWebGLErrorMessage());
@@ -85,11 +167,24 @@
       var textureLoader;
       var clock = new THREE.Clock();
       
-      // Physics variables
-      var gravityConstant = -9.8;
 
 
       init();
+      
+      const pointMultiplier = 1
+      const xMultiplier = 1.5
+      const yMultiplier = 1.8
+      const zMultiplier = 1
+      
+      
+      
+      // Adds our "floor"
+      var geometry4 = new THREE.PlaneBufferGeometry( 5000, 5000, 1 );
+      var material4 = new THREE.MeshBasicMaterial( {color: 'grey', side: THREE.DoubleSide} );
+      var plane = new THREE.Mesh( geometry4, material4 );
+      plane.rotateX(Math.PI/2)
+      plane.position.setY(-4)
+      scene.add( plane );
       animate();
 
       // Runs all our inital setup
@@ -110,10 +205,10 @@
         scene = new THREE.Scene();
         scene.background = new THREE.Color(0xbfd1e5);
 
-        camera.position.set(200, 200, -10);
+        camera.position.set(230, 70, 200);
 
         controls = new THREE.OrbitControls(camera);
-        controls.target.set(0, 0, 300);
+        controls.target.set(0, 50, 0);
         controls.update();
 
         renderer = new THREE.WebGLRenderer();
@@ -164,12 +259,7 @@
             switch (event.keyCode) {
               // Q
               case 81:
-                // armMovement = 1;
-                break;
-
-              // A
-              case 65:
-                // armMovement = -1;
+                launchCube()
                 break;
             }
           },
@@ -179,7 +269,6 @@
         window.addEventListener(
           "keyup",
           function() {
-            // armMovement = 0;
           },
           false
         );
@@ -187,6 +276,106 @@
 
       function createRandomColor() {
         return Math.floor(Math.random() * (1 << 24));
+      }
+      function randomizeInterval(start, end) {
+        return Math.floor(Math.random() * end) + start  
+      }
+      function launchCube() {
+      // Points
+      // Pos(3), PrevPos(3), FloorPos(3)
+      let randomLowMin = 1;
+      let randomLowMax = 30;
+
+      let randomHighMin = 30;
+      let randomHighMax = 70;
+
+      let hightMultiplyer = 1.5;
+  
+
+      let point1 = new Point(10, 10, 10, randomizeInterval(8, 10), randomizeInterval(randomLowMin, randomLowMax), randomizeInterval(randomLowMin, randomLowMax));
+      pointArray.push(point1)
+
+      let point2 = new Point(50, 10, 10, randomizeInterval(randomHighMin, randomHighMax), randomizeInterval(randomLowMin, randomLowMax), randomizeInterval(randomLowMin, randomLowMax));
+      pointArray.push(point2)
+
+      let point3 = new Point(50, 10, 50, 52, 4, 50);
+      pointArray.push(point3)
+
+      let point4 = new Point(10, 10, 50, 10, 4, 50);
+      pointArray.push(point4)
+
+      let point5 = new Point(10, 50, 10, 10, 22, 10);
+      pointArray.push(point5)
+
+      let point6 = new Point(50, 50, 10, 50, 32, 30);
+      pointArray.push(point6)
+
+      let point7 = new Point(50, 50, 50, 55, 32, 44);
+      pointArray.push(point7)
+
+      let point8 = new Point(10, 50, 50, 4, 32, 50);
+
+      pointArray.push(point8)
+
+      // Sticks
+      // Pos(3), PrevPos(3), FloorPos(3)
+      // One Side
+      let stick1 = new Stick(point1, point4);
+      stickArray.push(stick1)
+
+      let stick2 = new Stick(point2, point6);
+      stickArray.push(stick2)
+
+      let stick3 = new Stick(point3, point7);
+      stickArray.push(stick3)
+
+      let stick4 = new Stick(point5, point1);
+      stickArray.push(stick4)
+
+      // Connectors
+      let stick5 = new Stick(point1, point2);
+      stickArray.push(stick5)
+
+      let stick6 = new Stick(point2, point3);
+      stickArray.push(stick6)
+
+      let stick7 = new Stick(point3, point4);
+      stickArray.push(stick7)
+
+      let stick8 = new Stick(point4, point8);
+      stickArray.push(stick8)
+
+      // Second Side
+      let stick9 = new Stick(point5, point6);
+      stickArray.push(stick9)
+
+      let stick10 = new Stick(point6, point7);
+      stickArray.push(stick10)
+
+      let stick11 = new Stick(point7, point8);
+      stickArray.push(stick11)
+
+      let stick12 = new Stick(point8, point5);
+      stickArray.push(stick12)
+
+     // Structure side
+      let stick13 = new Stick(point1, point3);
+      stickArray.push(stick13)
+
+      let stick14 = new Stick(point2, point7);
+      stickArray.push(stick14)
+
+      let stick15 = new Stick(point6, point8);
+      stickArray.push(stick15)
+
+      let stick16 = new Stick(point5, point4);
+      stickArray.push(stick16)
+
+      let stick17 = new Stick(point1, point6);
+      stickArray.push(stick17)
+
+      let stick18 = new Stick(point3, point8);
+      stickArray.push(stick18)
       }
 
       function onWindowResize() {
@@ -199,6 +388,27 @@
       function animate() {
         requestAnimationFrame(animate);
 
+        for (let i = 0; i < pointArray.length; i++) {
+          pointArray[i].update()
+          pointMeshArray[i].position.copy(pointArray[i].position)
+        }
+
+        for(let i = 0; i < 20; i++) {
+          for(let j = 0; j < stickArray.length; j++) {
+            stickArray[j].update();
+            lineMeshArray[j].geometry.vertices[0] = stickArray[j].pointA.position;
+            lineMeshArray[j].geometry.vertices[1] = stickArray[j].pointB.position;
+          }
+          for (let j = 0; j < pointArray.length; j++) {
+            pointArray[j].updateCollision()
+            pointMeshArray[j].position.copy(pointArray[j].position)
+          }
+        
+        }
+        for(let i = 0; i < lineMeshArray.length; i++) {
+        lineMeshArray[i].geometry.verticesNeedUpdate = true;
+        }
+
         render();
       }
 
@@ -206,6 +416,9 @@
         var deltaTime = clock.getDelta();
 
         renderer.render(scene, camera);
+
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
       }
     </script>
   </body>
